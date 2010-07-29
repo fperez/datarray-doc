@@ -5,7 +5,7 @@ Datarray sphinx doc hosting
 This repo is used to host builds of the datarray sphinx doc. The actual code
 is in a `separate repo <http://github.com/fperez/datarray>`_.
 
-How to build sphonx docs
+How to build sphinx docs
 ------------------------
 
 To make a new build, simply go to the doc directory and type
