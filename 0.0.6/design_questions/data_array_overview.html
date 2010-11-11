@@ -1,0 +1,243 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>DataArray &mdash; DataArray Docs v0.0.6 documentation</title>
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.0.6',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="DataArray Docs v0.0.6 documentation" href="../index.html" />
+    <link rel="up" title="Design" href="index.html" />
+    <link rel="next" title="Larray (aka Larry)" href="larry_overview.html" />
+    <link rel="prev" title="Design" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="larry_overview.html" title="Larray (aka Larry)"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Design"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../index.html">DataArray Docs v0.0.6 documentation</a> &raquo;</li>
+          <li><a href="index.html" accesskey="U">Design</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="dataarray">
+<h1>DataArray<a class="headerlink" href="#dataarray" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="arrays-with-named-labeled-axes">
+<h2>Arrays with named / labeled axes<a class="headerlink" href="#arrays-with-named-labeled-axes" title="Permalink to this headline">¶</a></h2>
+<p>ndarrays extended to have an explicit &#8220;hypercross&#8221; of axes, each with
+names (possibly defaulted).</p>
+<ul>
+<li><p class="first">for methods in which an &#8220;axis&#8221; is denoted, an axis name may be used</p>
+</li>
+<li><p class="first">indexing/slicing along a named axis returns that slicing, at that axis,
+along with slice(None) slicing along all other axes</p>
+</li>
+<li><p class="first">for all arithmetic/binary-op matters under which dimension numbers and
+lengths must match, also the hypercrosses must be consistent</p>
+</li>
+<li><p class="first">broadcasting will &#8220;inherit&#8221; labels from the super-hyper-cross
+(see np.broadcast)</p>
+</li>
+<li><p class="first">padding dimensions will insert &#8220;dummy&#8221; dimensions, eg:</p>
+<div class="highlight-python"><pre>a = datarray( np.random.randn(10,10), ('time', 'temp') )
+a[:,None,:].axes --&gt; ('time', None, 'temp')</pre>
+</div>
+</li>
+<li><p class="first">axes may be transposed</p>
+</li>
+</ul>
+</div>
+<div class="section" id="arrays-with-named-axes-whose-named-axes-have-ticks">
+<h2>Arrays with named axes, whose named axes have ticks<a class="headerlink" href="#arrays-with-named-axes-whose-named-axes-have-ticks" title="Permalink to this headline">¶</a></h2>
+<p>each named axis has tick labels</p>
+<ul>
+<li><p class="first">numpy, fancy and slice-like indexing on each axis:</p>
+<div class="highlight-python"><pre>x.named_axis[...]
+--&gt; does any kind of numpy indexing on the axis
+x.named_axis.at( *args )
+--&gt; returns essentially "fancy" indexing along the axis, at valid ticks in args
+x.named_axis.t_slice( start, stop, [step])
+--&gt; where arguments are valid ticks, performs a slicing-like operation along the axis</pre>
+</div>
+</li>
+<li><p class="first">mixed indexing on the array:</p>
+<div class="highlight-python"><pre>x.at( *args )
+--&gt; len(args) &lt;= x.ndim -- for each indexing spec in args, perform that indexing
+       on the enumerated axes
+x.t_slice( *args )
+--&gt; same as above, but perform t_slice slicing on the enumerated axes</pre>
+</div>
+</li>
+</ul>
+</div>
+<div class="section" id="lessons-learned">
+<h2>Lessons Learned<a class="headerlink" href="#lessons-learned" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="smart-indexing">
+<h3>&#8220;Smart&#8221; Indexing<a class="headerlink" href="#smart-indexing" title="Permalink to this headline">¶</a></h3>
+<p>The smart indexing implemented by Larry is very full featured. I believe the
+design of using lists to separating labels from integers in mixed indexing is a
+good choice (and necessary). However, I think it illustrates the potential
+confusion created by mixed indexing and is a good argument for discouraging/not
+allowing it.</p>
+</div>
+<div class="section" id="smart-arithmetic">
+<h3>&#8220;Smart&#8221; Arithmetic<a class="headerlink" href="#smart-arithmetic" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li>Larry makes attempts to align its arrays when performing arithmetic, so as to
+operate on identical coordinates.</li>
+<li>It also might introduce intersections between arrays.</li>
+<li>It does not broadcast</li>
+</ul>
+</div>
+</div>
+<div class="section" id="ideas">
+<h2>Ideas<a class="headerlink" href="#ideas" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="axis-slicing">
+<h3>Axis Slicing<a class="headerlink" href="#axis-slicing" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="use-case-chained-axis-slicing">
+<h4>Use Case: chained axis slicing<a class="headerlink" href="#use-case-chained-axis-slicing" title="Permalink to this headline">¶</a></h4>
+<p>slicing on an axis returns a new DataArray:</p>
+<div class="highlight-python"><pre>arr = DataArray(np.random.randn(10,10), labels=('time', 'freq'))
+arr.axis.time[:5] --&gt; new DataArray with (time, freq) axes</pre>
+</div>
+<p>However, slicing on the special slicing object &#8220;aix&#8221; returns a new Special
+Tuple (stuple).</p>
+<p>Stuple:</p>
+<ul class="simple">
+<li>is len-N, for ND arrays</li>
+<li>only one entry is (potentially) not <tt class="docutils literal"><span class="pre">slice(None)</span></tt></li>
+<li>has knowledge of its own index</li>
+<li>has knowledge of other axes (static or dynamically generated attributes)</li>
+<li>can be composed with other stuples in a special way (??) &#8211;</li>
+</ul>
+<div class="highlight-python"><pre>s1 --&gt; ( slice(0,4), slice(None) )
+s2 --&gt; ( slice(None), slice(3,10) )
+s1 &lt;compose&gt; s2 --&gt; ( slice(0,4), slice(3,10) )</pre>
+</div>
+<ul class="simple">
+<li>can be given a &#8220;parent&#8221; stuple when constructed, into which the new stuple
+merges its own slicing in <tt class="docutils literal"><span class="pre">__getitem__</span></tt></li>
+</ul>
+<p>Constructor prototype:</p>
+<div class="highlight-python"><pre>def __init__(self, *args, parent=None, index=None, name=None) ??</pre>
+</div>
+<p>To chain slicing, the syntax would be like this:</p>
+<div class="highlight-python"><pre>arr.aix.time[:4].freq[3:8]
+--OR--
+arr[ arr.aix.time[:4].freq[3:8] ]</pre>
+</div>
+<p>Chaining an axis on itself <strong>will not</strong> be implemented yet (possibly ever):</p>
+<div class="highlight-python"><pre>arr.aix.time[:4].time[:2] --&gt; raise error</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">DataArray</a><ul>
+<li><a class="reference internal" href="#arrays-with-named-labeled-axes">Arrays with named / labeled axes</a></li>
+<li><a class="reference internal" href="#arrays-with-named-axes-whose-named-axes-have-ticks">Arrays with named axes, whose named axes have ticks</a></li>
+<li><a class="reference internal" href="#lessons-learned">Lessons Learned</a><ul>
+<li><a class="reference internal" href="#smart-indexing">&#8220;Smart&#8221; Indexing</a></li>
+<li><a class="reference internal" href="#smart-arithmetic">&#8220;Smart&#8221; Arithmetic</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#ideas">Ideas</a><ul>
+<li><a class="reference internal" href="#axis-slicing">Axis Slicing</a><ul>
+<li><a class="reference internal" href="#use-case-chained-axis-slicing">Use Case: chained axis slicing</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="index.html"
+                        title="previous chapter">Design</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="larry_overview.html"
+                        title="next chapter">Larray (aka Larry)</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/design_questions/data_array_overview.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="larry_overview.html" title="Larray (aka Larry)"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Design"
+             >previous</a> |</li>
+        <li><a href="../index.html">DataArray Docs v0.0.6 documentation</a> &raquo;</li>
+          <li><a href="index.html" >Design</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2010, Numpy Developers &lt;numpy-discussion@scipy.org&gt;.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.1.
+    </div>
+  </body>
+</html>
